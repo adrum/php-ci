@@ -16,12 +16,13 @@ COPY --from=composer /usr/bin/composer /usr/local/bin/composer
 # pcov is left loaded with its defaults (same as installing it in the job).
 # Do not add a conf.d ini disabling it: conf.d is scanned after `php -c`,
 # so it would override a project's coverage ini.
-RUN install-php-extensions intl bcmath pcov zip \
+# The mysql/psql clients are needed for Laravel to load schema dumps.
+RUN install-php-extensions intl bcmath pcov zip pdo_mysql pdo_pgsql gd exif pcntl redis \
     && if command -v apk >/dev/null; then \
-        apk add --no-cache git unzip curl; \
+        apk add --no-cache git unzip curl mariadb-client postgresql-client; \
     else \
         apt-get update \
-        && apt-get install -y --no-install-recommends git unzip curl \
+        && apt-get install -y --no-install-recommends git unzip curl default-mysql-client postgresql-client \
         && rm -rf /var/lib/apt/lists/*; \
     fi
 
