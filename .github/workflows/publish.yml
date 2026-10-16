@@ -40,6 +40,8 @@ jobs:
           context: .
           platforms: linux/${{ matrix.arch.name }}
           pull: true
+          # Weekly runs rebuild from scratch so OS packages and extensions are refreshed too.
+          no-cache: ${{ github.event_name == 'schedule' }}
           load: true
           tags: php-ci:test
           build-args: |
