@@ -30,7 +30,7 @@ Everything the official image ships (`pdo_sqlite`, `mbstring`, `curl`, `dom`, `o
 
 - **Extensions:** `intl`, `bcmath`, `zip`, `pdo_mysql`, `pdo_pgsql`, `gd`, `exif`,
   `pcntl`, `redis`, `pcov`
-- **Tools:** `composer` (2.x), `git`, `unzip`, `curl`, `mysql` and `psql` clients (used
+- **Tools:** `composer` (2.x), `git`, `unzip`, `curl`, `jq`, `mysql` and `psql` clients (used
   by Laravel to load schema dumps)
 
 `COMPOSER_ALLOW_SUPERUSER=1` is set. Xdebug is not installed.

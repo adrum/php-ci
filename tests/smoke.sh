@@ -16,6 +16,7 @@ composer --version
 git --version
 unzip -v | head -n 1
 curl --version | head -n 1
+jq --version
 mysql --version
 psql --version
 
