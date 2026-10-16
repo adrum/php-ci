@@ -3,6 +3,7 @@ name: Publish images
 on:
   push:
     branches: [main]
+    paths-ignore: ['README.md', 'LICENSE']
   pull_request:
   schedule:
     # Saturdays, to pick up PHP patch releases and base image updates.
