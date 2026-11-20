@@ -3,7 +3,7 @@
 ARG PHP_VERSION=8.4
 ARG BASE_SUFFIX=""
 
-FROM mlocati/php-extension-installer:2.11.34 AS installer
+FROM mlocati/php-extension-installer:2.13.2 AS installer
 FROM composer:2 AS composer
 
 FROM php:${PHP_VERSION}${BASE_SUFFIX}
