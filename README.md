@@ -10,6 +10,7 @@ and `linux/arm64`, and published to GHCR.
 
 | PHP | Debian | Alpine |
 | --- | --- | --- |
+| 8.6 | `ghcr.io/adrum/php-ci:8.6` | `ghcr.io/adrum/php-ci:8.6-alpine` |
 | 8.5 | `ghcr.io/adrum/php-ci:8.5` | `ghcr.io/adrum/php-ci:8.5-alpine` |
 | 8.4 | `ghcr.io/adrum/php-ci:8.4` | `ghcr.io/adrum/php-ci:8.4-alpine` |
 | 8.3 | `ghcr.io/adrum/php-ci:8.3` | `ghcr.io/adrum/php-ci:8.3-alpine` |
