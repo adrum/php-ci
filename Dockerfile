@@ -18,9 +18,14 @@ COPY --from=composer /usr/bin/composer /usr/local/bin/composer
 # so it would override a project's coverage ini.
 # The mysql/psql clients are needed for Laravel to load schema dumps.
 # PHP 8.6 images no longer bundle mbstring; on older versions it is built in and skipped.
+# phpredis 6.3.0 does not compile on PHP 8.6, so 8.6 installs it from a develop
+# commit that does until a release supports it.
 ARG PHP_VERSION
-RUN pcov=pcov; [ "$PHP_VERSION" = "8.6" ] && pcov=""; \
-    install-php-extensions mbstring intl bcmath $pcov zip pdo_mysql pdo_pgsql gd exif pcntl redis \
+RUN pcov=pcov; redis=redis; \
+    if [ "$PHP_VERSION" = "8.6" ]; then \
+        pcov=""; redis=phpredis/phpredis@a6ce1e60b3e81ce3b25174aa5aaefd5590dc64fd; \
+    fi; \
+    install-php-extensions mbstring intl bcmath $pcov zip pdo_mysql pdo_pgsql gd exif pcntl "$redis" \
     && if command -v apk >/dev/null; then \
         apk add --no-cache git unzip curl jq mariadb-client postgresql-client; \
     else \
