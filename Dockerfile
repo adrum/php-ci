@@ -18,14 +18,9 @@ COPY --from=composer /usr/bin/composer /usr/local/bin/composer
 # so it would override a project's coverage ini.
 # The mysql/psql clients are needed for Laravel to load schema dumps.
 # PHP 8.6 images no longer bundle mbstring; on older versions it is built in and skipped.
-# phpredis 6.3.0 does not compile on PHP 8.6, so 8.6 installs it from a develop
-# commit that does until a release supports it.
 ARG PHP_VERSION
-RUN pcov=pcov; redis=redis; \
-    if [ "$PHP_VERSION" = "8.6" ]; then \
-        pcov=""; redis=phpredis/phpredis@a6ce1e60b3e81ce3b25174aa5aaefd5590dc64fd; \
-    fi; \
-    install-php-extensions mbstring intl bcmath $pcov zip pdo_mysql pdo_pgsql gd exif pcntl "$redis" \
+RUN pecl=" pcov redis"; [ "$PHP_VERSION" = "8.6" ] && pecl=""; \
+    install-php-extensions mbstring intl bcmath zip pdo_mysql pdo_pgsql gd exif pcntl$pecl \
     && if command -v apk >/dev/null; then \
         apk add --no-cache git unzip curl jq mariadb-client postgresql-client; \
     else \
@@ -34,18 +29,25 @@ RUN pcov=pcov; redis=redis; \
         && rm -rf /var/lib/apt/lists/*; \
     fi
 
-# pcov 1.0.12 does not compile on PHP 8.6, so 8.6 builds it from
-# https://github.com/krakjoe/pcov/pull/134 until a release supports it.
+# The latest releases of pcov (1.0.12) and phpredis (6.3.0) do not compile on
+# PHP 8.6, so 8.6 builds them from pinned commits until releases support it:
+# pcov from https://github.com/krakjoe/pcov/pull/134 and phpredis from develop.
 ARG PCOV_86_COMMIT=f04029fa86ae58c6dfff8049de8433669dbf1394
+ARG PHPREDIS_86_COMMIT=a6ce1e60b3e81ce3b25174aa5aaefd5590dc64fd
 RUN if [ "$PHP_VERSION" = "8.6" ]; then \
-        if command -v apk >/dev/null; then apk add --no-cache --virtual .pcov-build $PHPIZE_DEPS; fi \
-        && mkdir /tmp/pcov \
-        && curl -fsSL "https://codeload.github.com/krakjoe/pcov/tar.gz/$PCOV_86_COMMIT" | tar -xz -C /tmp/pcov --strip-components=1 \
-        && cd /tmp/pcov \
-        && phpize && ./configure --enable-pcov && make -j"$(nproc)" && make install \
-        && docker-php-ext-enable pcov \
-        && cd / && rm -rf /tmp/pcov \
-        && if command -v apk >/dev/null; then apk del --no-network .pcov-build; fi; \
+        set -e; \
+        build() { \
+            mkdir "/tmp/$1"; \
+            curl -fsSL "https://codeload.github.com/$2/tar.gz/$3" | tar -xz -C "/tmp/$1" --strip-components=1; \
+            cd "/tmp/$1"; \
+            phpize; ./configure --enable-"$1"; make -j"$(nproc)"; make install; \
+            cd /; rm -rf "/tmp/$1"; \
+            docker-php-ext-enable "$1"; \
+        }; \
+        if command -v apk >/dev/null; then apk add --no-cache --virtual .ext-build $PHPIZE_DEPS; fi; \
+        build pcov krakjoe/pcov "$PCOV_86_COMMIT"; \
+        build redis phpredis/phpredis "$PHPREDIS_86_COMMIT"; \
+        if command -v apk >/dev/null; then apk del --no-network .ext-build; fi; \
     fi
 
 ENV COMPOSER_ALLOW_SUPERUSER=1
